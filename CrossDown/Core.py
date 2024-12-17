@@ -180,14 +180,22 @@ class DialogueBlock(Block):
 
     def on_end(self, block: xml.etree.ElementTree.Element):
         # 创建一个对话框
-        title = xml.etree.ElementTree.SubElement(block, 'figure')
-        title_text = xml.etree.ElementTree.SubElement(title, 'figcaption')
-        title_text.text = self.argument
+        # 创建标题
+        title = xml.etree.ElementTree.SubElement(block, 'div')
+        title.text = self.argument
+        title.set('class', 'message-title')
+        # 创建主体
         box = xml.etree.ElementTree.SubElement(block, 'div')
         box.set('class', 'message-box')
         # 添加对话
         for block_ in block.text.split('\n'):
-            charactor, direction, dialogue = re.compile(r'(.+)([<>])(.+)').match(block_).groups()  # 解析对话
+            try:
+                charactor, direction, dialogue = re.compile(r'(.+)([<>])(.+)').match(block_).groups()  # 解析对话
+            except AttributeError:  # 处理旁白
+                div = xml.etree.ElementTree.SubElement(box, 'div')
+                div.set('class', f'message middle')
+                div.text = block_
+                return
             div = xml.etree.ElementTree.SubElement(box, 'div')
             div.set('class', f'message {"left" if direction == ">" else "right"} {charactor}')
             div.text = dialogue

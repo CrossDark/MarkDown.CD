@@ -2,7 +2,7 @@ import setuptools
 
 from CrossDown import Meta
 
-meta = Meta(3, 5, 3)
+meta = Meta(3, 5, 8)
 
 setuptools.setup(
     name="CrossDown",

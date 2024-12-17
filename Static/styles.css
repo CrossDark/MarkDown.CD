@@ -76,8 +76,13 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 
 .block {background-color: grey; color: white;} /* 灰色背景,白色文字 */
 
+.message-title{
+  padding:10px;
+  text-align:center;
+}
+
 .message-box {
-            width: 300px;
+            width: auto;
             margin: 0 auto;
             border: 1px solid #ccc;
             border-radius: 5px;
@@ -99,4 +104,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 .right {
             background-color: #e5f0ff;
             text-align: right;
+        }
+
+.middle {
+            background-color: #e5f0ff;
+            text-align: center;
         }
