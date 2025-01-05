@@ -141,6 +141,8 @@
     <li><a href="#20.5">20.5 警告</a></li>
     </ul>
     </li>
+    <li><a href="#21">21 嵌套</a></li>
+    <li><a href="#_7">嵌套</a></li>
     </ul>
     </div>
     <h1 id="crossdown">CrossDown</h1>
@@ -282,14 +284,31 @@
     `#!py3 print(&#39;cd&#39;)`
     </code></pre></div>
     <h1 id="5">5 对话</h1>
-    <div>左侧&gt;话语
-    右侧&lt;话语
-    *旁白*<div class="message-title">对话框</div>
-    <div class="message-box">
-    <div class="message left 左侧">话语</div>
-    <div class="message right 右侧">话语</div>
-    <div class="message middle"><em>旁白</em></div>
+    <div>
+    <div class="message-title"></div>
+    <div class="dialog-container">
+    <div class="dialog-row">
+    <div class="user-name left">左侧</div>
+    <div class="message-content">话语</div>
+    <div class="user-name "></div>
     </div>
+    <div class="dialog-row">
+    <div class="user-name "></div>
+    <div class="message-content">话语</div>
+    <div class="user-name right">右侧</div>
+    </div>
+    <div class="dialog-row">
+    <div class="user-name "></div>
+    <div class="message-content"><em>旁白</em></div>
+    <div class="user-name "></div>
+    </div>
+    <div class="dialog-row">
+    <div class="user-name left"><code id="block">角色</code></div>
+    <div class="message-content"><code id="block">台词</code></div>
+    <div class="user-name "></div>
+    </div>
+    </div>
+    <br />
     </div>
     <h1 id="6">6 引用</h1>
     <blockquote>
@@ -655,5 +674,9 @@
     <p class="admonition-title">Caution</p>
     <p>Negative potential consequences of an action.</p>
     </div>
+    <h1 id="21">21 嵌套</h1>
+    <h1 id="_7">嵌套</h1>
+    <p>嵌套的内容</p>
+    <p>支持</p>
 </body>  
 </html>

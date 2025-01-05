@@ -40,6 +40,7 @@ from pymdownx.blocks.block import Block
 
 import kbdextension
 import markdown_gfm_admonition
+from markdown_include.include import MarkdownInclude
 
 from xml.etree.ElementTree import ElementTree
 
@@ -167,6 +168,78 @@ class Syllabus(BlockProcessor):
         return False
 
 
+class DialogueParser:
+    """
+    解析对话
+    """
+
+    def __init__(self, dialogue: str, title: str, block: xml.etree.ElementTree.Element):
+        """
+        初始化
+        :param dialogue: 原始对话文本
+        :param title: 原始对话标题
+        :param block: Element块
+        """
+        self.dialogue = dialogue
+        self.title = title
+        self.block = block
+        self.title = xml.etree.ElementTree.SubElement(self.block, 'div')
+        self.box = xml.etree.ElementTree.SubElement(self.block, 'div')
+
+    def __call__(self, *args, **kwargs):
+        # 创建一个对话框
+        # 创建标题
+        self.title.set('class', 'message-title')
+        # 创建主体
+        self.box.set('class', 'dialog-container')
+        # 添加对话
+        for block_ in self.block.text.split('\n'):
+            self.lines(block_)
+        xml.etree.ElementTree.SubElement(self.block, 'br')  # 添加强制换行符,防止格式错乱
+
+    def lines(self, line):
+        if line == '':
+            return
+        try:
+            line = re.compile(r'(.+)([<>]+)(.+)').match(line).groups()  # 尝试解析对话
+        except AttributeError:  # 处理旁白
+            self.normal_line('middle', '', line)
+        else:
+            match line:
+                case charactor, '>', dialogue:
+                    self.normal_line('left', charactor, dialogue)
+                case charactor, '<', dialogue:
+                    self.normal_line('right', charactor, dialogue)
+                case charactor, '<<', dialogue:
+                    pass
+                case charactor, '>>', dialogue:
+                    pass
+                case _:
+                    pass
+
+    def normal_line(self, direction: str, charactor: str, text: str):
+        # 创建话语行
+        dialogue = xml.etree.ElementTree.SubElement(self.box, 'div')
+        dialogue.set('class', 'dialog-row')
+
+        # 左侧用户
+        left = xml.etree.ElementTree.SubElement(dialogue, 'div')
+        left.set('class', f'user-name {'left' if direction == 'left' else ''}')
+        if direction == 'left':
+            left.text = charactor
+
+        # 中间话语
+        middle = xml.etree.ElementTree.SubElement(dialogue, 'div')
+        middle.set('class', 'message-content')
+        middle.text = text
+
+        # 右侧用户
+        right = xml.etree.ElementTree.SubElement(dialogue, 'div')
+        right.set('class', f'user-name {'right' if direction == 'right' else ''}')
+        if direction == 'right':
+            right.text = charactor
+
+
 class DialogueBlock(Block):
     NAME = 'dialogue'
     ARGUMENT = None
@@ -179,27 +252,7 @@ class DialogueBlock(Block):
         return 'raw'
 
     def on_end(self, block: xml.etree.ElementTree.Element):
-        # 创建一个对话框
-        # 创建标题
-        title = xml.etree.ElementTree.SubElement(block, 'div')
-        title.text = self.argument
-        title.set('class', 'message-title')
-        # 创建主体
-        box = xml.etree.ElementTree.SubElement(block, 'div')
-        box.set('class', 'message-box')
-        # 添加对话
-        for block_ in block.text.split('\n'):
-            try:
-                charactor, direction, dialogue = re.compile(r'(.+)([<>])(.+)').match(block_).groups()  # 解析对话
-            except AttributeError:  # 处理旁白
-                div = xml.etree.ElementTree.SubElement(box, 'div')
-                div.set('class', f'message middle')
-                div.text = block_
-                return
-            div = xml.etree.ElementTree.SubElement(box, 'div')
-            div.set('class', f'message {"left" if direction == ">" else "right"} {charactor}')
-            div.text = dialogue
-        xml.etree.ElementTree.SubElement(block, 'br')  # 添加强制换行符,防止格式错乱
+        DialogueParser(block.text, self.argument, block)()
         block.text = ''  # 清空块的内容
 
 
@@ -343,6 +396,7 @@ Extensions = {
     # 其它
     'KBD': kbdextension.KbdExtension(),
     'GFM 警告': markdown_gfm_admonition.GfmAdmonitionExtension(),
+    '嵌套MD': MarkdownInclude(),
 
     # 自定义
     '基本风格': BasicExtension(),
