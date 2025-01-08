@@ -121,3 +121,11 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   background-color: #f9f9f9;
   text-align: center;
 }
+
+.thought {
+  font-style: italic;
+  color: #555;
+  margin-top: 5px;
+  font-size: 0.9em;
+  opacity: 0.8;
+}

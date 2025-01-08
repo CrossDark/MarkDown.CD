@@ -201,42 +201,47 @@ class DialogueParser:
         if line == '':
             return
         try:
-            line = re.compile(r'(.+)([<>]+)(.+)').match(line).groups()  # 尝试解析对话
+            line = re.compile(r'(.+?)([<>]+)(.+)').match(line).groups()  # 尝试解析对话
         except AttributeError:  # 处理旁白
-            self.normal_line('middle', '', line)
+            self.line('中', '', line)
         else:
             match line:
                 case charactor, '>', dialogue:
-                    self.normal_line('left', charactor, dialogue)
+                    self.line('左', charactor, dialogue)
                 case charactor, '<', dialogue:
-                    self.normal_line('right', charactor, dialogue)
-                case charactor, '<<', dialogue:
-                    pass
+                    self.line('右', charactor, dialogue)
                 case charactor, '>>', dialogue:
-                    pass
+                    self.line('左', charactor, dialogue, '心理')
+                case charactor, '<<', dialogue:
+                    self.line('右', charactor, dialogue, '心理')
                 case _:
                     pass
 
-    def normal_line(self, direction: str, charactor: str, text: str):
+    def line(self, direction: Literal['左', '中', '右'], charactor: str, text: str, type_: Literal['普通', '心理'] = '普通'):
         # 创建话语行
         dialogue = xml.etree.ElementTree.SubElement(self.box, 'div')
         dialogue.set('class', 'dialog-row')
 
         # 左侧用户
         left = xml.etree.ElementTree.SubElement(dialogue, 'div')
-        left.set('class', f'user-name {'left' if direction == 'left' else ''}')
-        if direction == 'left':
+        left.set('class', f'user-name {'left' if direction == '左' else ''}')
+        if direction == '左':
             left.text = charactor
 
         # 中间话语
         middle = xml.etree.ElementTree.SubElement(dialogue, 'div')
         middle.set('class', 'message-content')
-        middle.text = text
+        if type_ == '普通':
+            middle.text = text
+        elif type_ == '心理':
+            mental = xml.etree.ElementTree.SubElement(middle, 'p')
+            mental.set('class', 'thought')
+            mental.text = text
 
         # 右侧用户
         right = xml.etree.ElementTree.SubElement(dialogue, 'div')
-        right.set('class', f'user-name {'right' if direction == 'right' else ''}')
-        if direction == 'right':
+        right.set('class', f'user-name {'right' if direction == '右' else ''}')
+        if direction == '右':
             right.text = charactor
 
 
