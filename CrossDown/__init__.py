@@ -1,6 +1,6 @@
 from typing import *
 import pickle
-from .Core import main, Variable, Syllabus
+from .Core import main, Variable, Syllabus, InlineCode, Extensions
 
 __all__ = [
     'main',  # 主函数
@@ -9,12 +9,14 @@ __all__ = [
     'Meta',  # 元数据处理器
     'Syllabus',  # 提纲扩展
     'Variable',  # 变量类型提示
+    'InlineCode',  # 自定义单行代码
+    'Extensions',  # 所有扩展
 ]
-__version__ = '0.11.2'
+__version__ = '3.4.8'
 __author__ = 'CrossDark'
 __email__ = 'liuhanbo333@icloud.com'
 __source__ = 'https://crossdark.net/'
-__license__ = """MIT"""
+__license__ = 'MIT'
 
 HEAD = {
     # mathjax
@@ -27,6 +29,9 @@ HEAD = {
 
     # 代码高亮css
     ('code-highlight', 'css'): '<link rel="stylesheet" href="../Static/styles.css">',
+
+    # Chart.js
+    ('chart', 'js'): '<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>'
 }
 
 

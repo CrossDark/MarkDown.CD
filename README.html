@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <script>mermaid.initialize({startOnLoad:true})</script>
     <link rel="stylesheet" href="../Static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- 可以在这里添加其他元数据和CSS链接 -->  
 </head>  
 <body>
@@ -84,7 +85,7 @@
     </li>
     </ul>
     </li>
-    <li><a href="#5">5 转义</a></li>
+    <li><a href="#5">5 对话</a></li>
     <li><a href="#6">6 引用</a></li>
     <li><a href="#7">7 提纲</a><ul>
     <li><a href="#7.1">7.1 提纲号</a><ul>
@@ -140,6 +141,8 @@
     <li><a href="#20.5">20.5 警告</a></li>
     </ul>
     </li>
+    <li><a href="#21">21 嵌套</a></li>
+    <li><a href="#_7">嵌套</a></li>
     </ul>
     </div>
     <h1 id="crossdown">CrossDown</h1>
@@ -190,7 +193,7 @@
     <h2 id="3.2">3.2 链接</h2>
     <p><a href=#锚点>锚点</a></p>
     <h1 id="4">4 代码块</h1>
-    <h2 id="4.1">4.1 <span class="block">单行</span></h2>
+    <h2 id="4.1">4.1 <code id="block">单行</code></h2>
     <p>Here is some code: <code class="highlight"><span class="kn">import</span> <span class="nn">pymdownx</span><span class="p">;</span> <span class="n">pymdownx</span><span class="o">.</span><span class="n">__version__</span></code>.</p>
     <p>The mock shebang will be treated like text here: <span id="!js var test = 0;">!js var test = 0;</span>.</p>
     <h3 id="4.1.1">4.1.1 LaTex</h3>
@@ -199,14 +202,14 @@
     <sup>3</sup>H<sub>2</sub>O</p>
     <p><span class="arithmatex"><span class="MathJax_Preview">\lg\left(\frac{目标生物的理智值}{稳定折磨型工具人的理智值}\right)</span><script type="math/tex">\lg\left(\frac{目标生物的理智值}{稳定折磨型工具人的理智值}\right)</script></span></p>
     <h3 id="4.1.2">4.1.2 函数</h3>
-    <p><span class="block">¥y=x*2+1¥</span>  // 不定义范围</p>
-    <p><span class="block">¥y=x**2¥€-50,50€</span>  // 定义了x范围</p>
-    <p><span class="block">¥y=x**3¥€-50,50|-100,100€</span>  // 定义了y范围</p>
+    <p><code id="block">¥y=x*2+1¥</code>  // 不定义范围</p>
+    <p><code id="block">¥y=x**2¥€-50,50€</code>  // 定义了x范围</p>
+    <p><code id="block">¥y=x**3¥€-50,50|-100,100€</code>  // 定义了y范围</p>
     <h3 id="4.1.3">4.1.3 按键风格</h3>
     <p><span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-alt">Alt</kbd><span>+</span><kbd class="key-delete">Del</kbd></span></p>
     <p><kbd>Enter</kbd></p>
     <h3 id="4.1.4">4.1.4 突出</h3>
-    <p><span class="block">突出内容</span></p>
+    <p><code id="block">突出内容</code></p>
     <h2 id="4.2">4.2 多行</h2>
     <h3 id="4.2.1">4.2.1 YAML</h3>
     <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2</span>
@@ -280,10 +283,47 @@
         print(&#39;CrossDown&#39;)
     `#!py3 print(&#39;cd&#39;)`
     </code></pre></div>
-    <h1 id="5">5 转义</h1>
-    <p>\ </p>
-    <p>\a </p>
-    <p>*</p>
+    <h1 id="5">5 对话</h1>
+    <div>
+    <div class="message-title"></div>
+    <div class="dialog-container">
+    <div class="dialog-row">
+    <div class="user-name left">左侧</div>
+    <div class="message-content">话语</div>
+    <div class="user-name "></div>
+    </div>
+    <div class="dialog-row">
+    <div class="user-name "></div>
+    <div class="message-content">话语</div>
+    <div class="user-name right">右侧</div>
+    </div>
+    <div class="dialog-row">
+    <div class="user-name left">左侧</div>
+    <div class="message-content">
+    <p class="thought">心理</p>
+    </div>
+    <div class="user-name "></div>
+    </div>
+    <div class="dialog-row">
+    <div class="user-name "></div>
+    <div class="message-content">
+    <p class="thought">心理</p>
+    </div>
+    <div class="user-name right">右侧</div>
+    </div>
+    <div class="dialog-row">
+    <div class="user-name "></div>
+    <div class="message-content"><em>旁白</em></div>
+    <div class="user-name "></div>
+    </div>
+    <div class="dialog-row">
+    <div class="user-name left"><code id="block">角色</code></div>
+    <div class="message-content"><code id="block">台词</code></div>
+    <div class="user-name "></div>
+    </div>
+    </div>
+    <br />
+    </div>
     <h1 id="6">6 引用</h1>
     <blockquote>
     <p>一级引用</p>
@@ -354,7 +394,7 @@
     <li>c</li>
     </ul>
     </dd>
-    <dt><span class="block">强调值</span></dt>
+    <dt><code id="block">强调值</code></dt>
     <dd>
     <ul>
     <li>a</li>
@@ -648,5 +688,9 @@
     <p class="admonition-title">Caution</p>
     <p>Negative potential consequences of an action.</p>
     </div>
+    <h1 id="21">21 嵌套</h1>
+    <h1 id="_7">嵌套</h1>
+    <p>嵌套的内容</p>
+    <p>支持</p>
 </body>  
 </html>

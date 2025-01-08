@@ -75,3 +75,57 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 .highlight .il { color: #666666 } /* Literal.Number.Integer.Long */
 
 .block {background-color: grey; color: white;} /* 灰色背景,白色文字 */
+
+.message-title{
+  padding:10px;
+  text-align:center;
+}
+
+.dialog-container {
+  width: 80%;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+}
+
+.dialog-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.user-name {
+  width: 20%;
+  text-align: center;
+  font-weight: bold;
+}
+
+.user-name.left {
+  text-align: left;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.user-name.right {
+  text-align: right;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.message-content {
+  width: 60%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  text-align: center;
+}
+
+.thought {
+  font-style: italic;
+  color: #555;
+  margin-top: 5px;
+  font-size: 0.9em;
+  opacity: 0.8;
+}

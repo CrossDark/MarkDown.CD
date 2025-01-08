@@ -14,7 +14,6 @@ from markdown.extensions import Extension, meta, toc, wikilinks, legacy_attrs
 from markdown.inlinepatterns import InlineProcessor
 
 from pymdownx.arithmatex import ArithmatexExtension
-from pymdownx.blocks import BlocksExtension
 from pymdownx.blocks.admonition import AdmonitionExtension
 from pymdownx.blocks.details import DetailsExtension
 from pymdownx.blocks.html import HTMLExtension
@@ -36,12 +35,14 @@ from pymdownx.tasklist import TasklistExtension
 from pymdownx.tilde import DeleteSubExtension
 from pymdownx.magiclink import MagiclinkExtension
 from pymdownx.pathconverter import PathConverterExtension
+from pymdownx.blocks import BlocksExtension
+from pymdownx.blocks.block import Block
 
 import kbdextension
 import markdown_gfm_admonition
+from markdown_include.include import MarkdownInclude
 
 from xml.etree.ElementTree import ElementTree
-
 
 Variable = dict[str, str | tuple[str], list[str]] | None
 
@@ -167,6 +168,99 @@ class Syllabus(BlockProcessor):
         return False
 
 
+class DialogueParser:
+    """
+    解析对话
+    """
+
+    def __init__(self, dialogue: str, title: str, block: xml.etree.ElementTree.Element):
+        """
+        初始化
+        :param dialogue: 原始对话文本
+        :param title: 原始对话标题
+        :param block: Element块
+        """
+        self.dialogue = dialogue
+        self.title = title
+        self.block = block
+        self.title = xml.etree.ElementTree.SubElement(self.block, 'div')
+        self.box = xml.etree.ElementTree.SubElement(self.block, 'div')
+
+    def __call__(self, *args, **kwargs):
+        # 创建一个对话框
+        # 创建标题
+        self.title.set('class', 'message-title')
+        # 创建主体
+        self.box.set('class', 'dialog-container')
+        # 添加对话
+        for block_ in self.block.text.split('\n'):
+            self.lines(block_)
+        xml.etree.ElementTree.SubElement(self.block, 'br')  # 添加强制换行符,防止格式错乱
+
+    def lines(self, line):
+        if line == '':
+            return
+        try:
+            line = re.compile(r'(.+?)([<>]+)(.+)').match(line).groups()  # 尝试解析对话
+        except AttributeError:  # 处理旁白
+            self.line('中', '', line)
+        else:
+            match line:
+                case charactor, '>', dialogue:
+                    self.line('左', charactor, dialogue)
+                case charactor, '<', dialogue:
+                    self.line('右', charactor, dialogue)
+                case charactor, '>>', dialogue:
+                    self.line('左', charactor, dialogue, '心理')
+                case charactor, '<<', dialogue:
+                    self.line('右', charactor, dialogue, '心理')
+                case _:
+                    pass
+
+    def line(self, direction: Literal['左', '中', '右'], charactor: str, text: str, type_: Literal['普通', '心理'] = '普通'):
+        # 创建话语行
+        dialogue = xml.etree.ElementTree.SubElement(self.box, 'div')
+        dialogue.set('class', 'dialog-row')
+
+        # 左侧用户
+        left = xml.etree.ElementTree.SubElement(dialogue, 'div')
+        left.set('class', f'user-name {'left' if direction == '左' else ''}')
+        if direction == '左':
+            left.text = charactor
+
+        # 中间话语
+        middle = xml.etree.ElementTree.SubElement(dialogue, 'div')
+        middle.set('class', 'message-content')
+        if type_ == '普通':
+            middle.text = text
+        elif type_ == '心理':
+            mental = xml.etree.ElementTree.SubElement(middle, 'p')
+            mental.set('class', 'thought')
+            mental.text = text
+
+        # 右侧用户
+        right = xml.etree.ElementTree.SubElement(dialogue, 'div')
+        right.set('class', f'user-name {'right' if direction == '右' else ''}')
+        if direction == '右':
+            right.text = charactor
+
+
+class DialogueBlock(Block):
+    NAME = 'dialogue'
+    ARGUMENT = None
+    OPTIONS = {}
+
+    def on_create(self, parent):
+        return xml.etree.ElementTree.SubElement(parent, 'div')
+
+    def on_markdown(self) -> str:
+        return 'raw'
+
+    def on_end(self, block: xml.etree.ElementTree.Element):
+        DialogueParser(block.text, self.argument, block)()
+        block.text = ''  # 清空块的内容
+
+
 class BasicExtension(Extension):
     """
     渲染基本样式
@@ -187,10 +281,16 @@ class BasicExtension(Extension):
         md.parser.blockprocessors.register(Syllabus(md.parser), 'syllabus', 182)  # 渲染提纲
 
 
+class DialogueExtension(BlocksExtension):
+    def extendMarkdownBlocks(self, md, block_mgr):
+        block_mgr.register(DialogueBlock, self.getConfigs())
+
+
 class InlineCode:
     """
     生成InlineHiliteExtension的自定义格式化器
     """
+
     def __init__(self, variable: Variable):
         """
         初始化
@@ -198,7 +298,8 @@ class InlineCode:
         """
         self.variable = variable
 
-    def __call__(self, source: str, language: str, css_class: str, md: markdown.core.Markdown) -> str | ElementTree:  # 自定义的单行代码格式化器
+    def __call__(self, source: str, language: str, css_class: str,
+                 md: markdown.core.Markdown) -> str | ElementTree:  # 自定义的单行代码格式化器
         """
         InlineHiliteExtension的自定义格式化器
         :param source: 原始单行代码
@@ -220,11 +321,36 @@ class InlineCode:
                 return f'<a href=#{inline_link}>{inline_link}</a>'
             case None, variable:  # 可能匹配到`变量`
                 if variable in self.variable:  # 是`变量`
-                    return f'<span class="block">{self.variable[variable]}</span>'
+                    return f'<code id="block">{self.variable[variable]}</code>'
                 else:  # 不是`变量`
-                    return f'<span class="block">{variable}</span>'
-            case _:
-                return f'<code>{source}</code>'
+                    return f'<code id="block">{variable}</code>'
+
+
+def dialogue_formatter(
+        source: str,
+        language: str,
+        css_class: str,
+        options: dict,
+        md: markdown.core.Markdown,
+        classes: list | None = None,
+        id_value: str = '',
+        attrs: dict | None = None,
+        **kwargs,
+) -> str:
+    """
+    自定义对话格式化器
+    :param source: 源代码
+    :param language: 语言
+    :param css_class: css类
+    :param options: 自定义选项
+    :param md: markdown实例
+    :param classes: 在大括号样式标头中定义的附加类
+    :param id_value: 可选ID
+    :param attrs: 大括号样式标头中定义的任何属性
+    :param kwargs:
+    :return: 返回的html字符串
+    """
+    return f'<canvas></canvas><script>{source}</script>'
 
 
 Extensions = {
@@ -243,6 +369,11 @@ Extensions = {
                     'class': 'mermaid',
                     'format': fence_div_format,
                 },
+                {
+                    'name': 'dialogue',
+                    'class': 'dialogue',
+                    'format': dialogue_formatter,
+                }
             ]
         },
     }),
@@ -270,9 +401,11 @@ Extensions = {
     # 其它
     'KBD': kbdextension.KbdExtension(),
     'GFM 警告': markdown_gfm_admonition.GfmAdmonitionExtension(),
+    '嵌套MD': MarkdownInclude(),
 
     # 自定义
     '基本风格': BasicExtension(),
+    '对话': DialogueExtension(),
 }
 
 
